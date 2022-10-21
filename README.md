@@ -8,7 +8,7 @@ Import your bank transactions from your clipboard or from a file. Create categor
 - Clean UI — achieved with ~~CryEngine~~ Qt (PySide)
 - Intelligent data importing
     - Import from a text file or clipboard: almost no formatting restrictions, the only requirement is that the entries should be separated by newlines
-    - Smart formatting detection: tries to guess the value separator and the indexes for date/amount/entity values
+    - Smart formatting detection: tries to guess the value separator, the indexes for date/amount/entity values, and the date formatting
     - If the above fails, you can configure the indexes and date format yourself; the program validates these for you so you don't have to worry too much about making mistakes
     - Configuration presets: if the formatting in your imports tends to vary, no need to adjust the configurations every time
 - Create categories for entities (payers/recipients) and keep track of the monthly differences and yearly averages
