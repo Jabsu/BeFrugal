@@ -68,10 +68,10 @@ class MainWindow(QMainWindow):
             self.settings = self.db.data
 
     def load_comments(self):
-        self.com_db = ManageJSON("comments.json")
-        self.com_db.read_data()
+        com_db = ManageJSON("comments.json")
+        com_db.read_data()
 
-        if d := self.com_db.data:
+        if d := com_db.data:
             for year, values in d.items():
                 for row, text in values.items():
                     try:
@@ -84,8 +84,9 @@ class MainWindow(QMainWindow):
                     cell.setText(text)
 
     def save_comments(self):
-
+        com_db = ManageJSON("comments.json")
         dic = {}
+        
         for year, table in self.tables.items():
             for row in range(0, table.rowCount()):
                 item = table.item(row, self.comment_column)
@@ -98,7 +99,7 @@ class MainWindow(QMainWindow):
                 except KeyError:
                     dic[year] = {row+1: item.text()}
 
-        self.com_db.save_data(dic)
+        com_db.save_data(dic)
 
     def save_settings(self):
         self.db.save_data(self.settings)
