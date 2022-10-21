@@ -1,0 +1,10 @@
+__pycache__
+.qt_for_python
+.venv
+test.py
+config.py
+reminders.md
+*.ui
+*.csv
+*.txt
+*.json
