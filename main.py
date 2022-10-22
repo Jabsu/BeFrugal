@@ -4,7 +4,7 @@ from datetime import date
 
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QFont
-from PySide6.QtWidgets import (QApplication, QGridLayout, QHeaderView, QMainWindow, QHeaderView,
+from PySide6.QtWidgets import (QApplication, QGridLayout, QHeaderView, QMainWindow, QHeaderView, QStyledItemDelegate,
                                QFileDialog, QMessageBox, QTableWidget, QTableWidgetItem, QWidget)
 
 from ui.main_window import UI_MainWindow
@@ -14,8 +14,6 @@ from components.formatting import Formatting
 from components.duplicates import Duplicates
 from components.entities_found import EntitiesFound
 from components.manage_json import ManageJSON
-
-import config
 
 
 class MainWindow(QMainWindow):
@@ -86,7 +84,7 @@ class MainWindow(QMainWindow):
     def save_comments(self):
         com_db = ManageJSON("comments.json")
         dic = {}
-        
+
         for year, table in self.tables.items():
             for row in range(0, table.rowCount()):
                 item = table.item(row, self.comment_column)
@@ -216,7 +214,7 @@ class MainWindow(QMainWindow):
         self.entities['Recipient'] = self.transactions.known_entities['Recipient'] | self.new_entities_dialog.selections['Recipient']
         ent_db.save_data(self.entities)
         self.create_tables_from_data()
-        
+
     def create_categories(self):
         self.categories = []
 
@@ -284,6 +282,9 @@ class MainWindow(QMainWindow):
         grid.addWidget(table_widget, 0, 0, 1, 1)
 
         self.ui.configure_table(table_widget)
+
+        table_widget.setWordWrap(True)
+
         self.tables[self.year] = table_widget
 
         self.table = table_widget
@@ -326,28 +327,26 @@ class MainWindow(QMainWindow):
         item = add_column('Comments')
         item.setData(Qt.UserRole, 'Comments')
         item.setTextAlignment(Qt.AlignLeft | Qt.AlignVCenter)
-
+        
         # Apply header styles
         header = self.table.horizontalHeader()
+        delegate = ReadOnlyDelegate(table)
         for col in range(0, table.columnCount()):
             h_item = table.horizontalHeaderItem(col)
             if (h_item.data(Qt.UserRole) == 'Difference' or
                h_item.data(Qt.UserRole) == 'Net'):
                 header.setSectionResizeMode(col, QHeaderView.ResizeToContents)
-
+                table.setItemDelegateForColumn(col, delegate)
             elif (h_item.data(Qt.UserRole) == 'Comments'):
                 self.comment_column = col
-                header.setSectionResizeMode(col, QHeaderView.ResizeToContents)
-                header.setMaximumSectionSize(screen.width() / 4)
+                # header.setSectionResizeMode(col, QHeaderView.ResizeToContents)
+                # header.setMaximumSectionSize(screen.width() / 4)
+                header.setStretchLastSection(True)
             else:
+                table.setItemDelegateForColumn(col, delegate)
                 header.setSectionResizeMode(col, QHeaderView.ResizeToContents)
+        
 
-        # table.horizontalHeader().sectionClicked.connect(self.header_clicked)
-
-    def header_clicked(self, logical_index):
-        tab = self.ui.tab_widget.currentWidget().objectName()
-        print(self.averages_per_year[tab])
-        table = self.table
 
     def create_vertical_header(self, header: str) -> object:
         n = self.table.rowCount()
@@ -454,7 +453,7 @@ class MainWindow(QMainWindow):
             ret[column] = 0
 
         for transaction in items[self.year][month].values():
-            try: 
+            try:
                 amount = transaction['amount']
                 entity = transaction['entity'].title()
             except KeyError:
@@ -517,6 +516,11 @@ class MainWindow(QMainWindow):
                     item.setText(val)
                     item.setTextAlignment(self.ui.cell_align)
                     r += 1
+
+
+class ReadOnlyDelegate(QStyledItemDelegate):
+    def createEditor(self, parent, option, index):
+        return
 
 
 if __name__ == "__main__":
