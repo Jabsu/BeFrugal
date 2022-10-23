@@ -3,7 +3,6 @@ import traceback
 from datetime import datetime
 from time import time as epoch
 
-import config
 from .manage_json import ManageJSON
 
 
@@ -12,7 +11,7 @@ class Transactions:
     def __init__(self, transaction_data=None):
         self.transaction_data = transaction_data
         
-        self.db = ManageJSON(config.DATABASE)
+        self.db = ManageJSON('transactions.json')
         self.ent_db = ManageJSON('entities.json')
         self.load_known_entities()
         

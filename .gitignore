@@ -1,9 +1,7 @@
 __pycache__
 .qt_for_python
 .venv
-test.py
-config.py
-reminders.md
+testing.py
 *.ui
 *.csv
 *.txt

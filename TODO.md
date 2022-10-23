@@ -1,11 +1,14 @@
 
 ### Settings dialog
-- [ ] design the UI
-- [ ] create/set categories (akin to entities_found.py dialog)
-- [ ] show formatting settings dialog after every import: true/false
-- [ ] change currency
-- [ ] language and/or other localization specific settings?
-- [ ] delete saved transactions and other data
+- [x] design the UI
+- [ ] change theme
+- [ ] change currency (cosmetic)
+- [ ] toggle: show formatting dialog after each import
+- [ ] button: delete transaction history
+- [ ] button: category configuration
+
+### Category configuration dialog (via settings)
+- [x] design the UI
 
 ### Individual transactions dialog
 - [ ] design the UI
@@ -15,6 +18,7 @@
 
 ### Other features
 - [ ] implement "according to" combobox functionality
+- [ ] allow regex for categorizing entities
 
 ### Polish
 - [x] allow cell edit only in comments section

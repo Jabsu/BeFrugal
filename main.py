@@ -5,7 +5,7 @@ from datetime import date
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QFont
 from PySide6.QtWidgets import (QApplication, QGridLayout, QHeaderView, QMainWindow, QHeaderView, QStyledItemDelegate,
-                               QFileDialog, QMessageBox, QTableWidget, QTableWidgetItem, QWidget)
+                               QFileDialog, QMessageBox, QTableWidget, QTableWidgetItem, QWidget, QStyleFactory)
 
 from ui.main_window import UI_MainWindow
 
@@ -15,12 +15,15 @@ from components.duplicates import Duplicates
 from components.entities_found import EntitiesFound
 from components.manage_json import ManageJSON
 
+# import qdarktheme
 
 class MainWindow(QMainWindow):
-    def __init__(self, screen):
+    def __init__(self, screen, app):
         super(MainWindow, self).__init__()
         self.ui = UI_MainWindow()
         self.screen = screen
+        self.app = app
+        #  app.setStyleSheet(qdarktheme.load_stylesheet())
 
         self.first_resize = True
 
@@ -33,8 +36,6 @@ class MainWindow(QMainWindow):
         self.tabs = {}
         self.tables = {}
 
-        # For testing:
-        # self.bank = 'Nordea'
         self.create_menu_connections()
 
         self.entities = {'Payer': {}, 'Recipient': {}}
@@ -54,7 +55,10 @@ class MainWindow(QMainWindow):
         self.settings["main_window_height"] = self.size().height()
         self.save_settings()
         self.save_comments()
-        event.accept()
+        try:
+            event.accept()
+        except AttributeError:
+            self.app.quit()
 
     def load_settings(self):
         self.db = ManageJSON("settings.json")
@@ -109,14 +113,20 @@ class MainWindow(QMainWindow):
             "main_window_height": int(screen.height() / 2 + 55),
             "main_window_width": int(screen.width() / 2),
             "show_formatting_window": True,
+            "theme": "Fusion",
             "save_target": "10000",
-            "currency": "simoleon(s)",
+            "currency": "EUR",
         }
 
     def create_menu_connections(self):
         self.ui.menu_import_from_file.triggered.connect(self.read_file)
         self.ui.menu_import_from_clipboard.triggered.connect(
             self.read_clipboard)
+        self.ui.menu_quit.triggered.connect(self.closeEvent)
+        self.ui.menu_settings.triggered.connect(self.open_settings_dialog)
+
+    def open_settings_dialog(self):
+        pass
 
     def calculate_eta(self):
         tab = self.ui.tab_widget.currentWidget().objectName()
@@ -526,7 +536,6 @@ class ReadOnlyDelegate(QStyledItemDelegate):
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     screen = app.primaryScreen().size()
-    window = MainWindow(screen)
-    # window.resize(half_width, half_height)
+    window = MainWindow(screen, app)
     window.show()
     sys.exit(app.exec())

@@ -7,17 +7,14 @@ from PySide6.QtWidgets import (QAbstractItemView, QComboBox, QGridLayout, QLabel
 
 class UI_MainWindow(object):
     def setup_ui(self, MainWindow, height, width):
-        # if not MainWindow.objectName():
-        #    MainWindow.setObjectName(u"MainWindow")
-
+        
         MainWindow.resize(width, height)
-        MainWindow.setWindowTitle("FrugalPY")
+        MainWindow.setWindowTitle("BeFrugal")
 
         self.menubar = QMenuBar(MainWindow)
         self.menu_file = QMenu(self.menubar)
         self.menu_import_transactions = QMenu(self.menu_file)
         self.menu_import_transactions.setTitle('Import transactions')
-
         MainWindow.setMenuBar(self.menubar)
 
         # create menu objects
@@ -25,6 +22,7 @@ class UI_MainWindow(object):
             'menu_quit': 'Quit',
             'menu_import_from_file': 'From a file...',
             'menu_import_from_clipboard': 'From the clipboard',
+            'menu_settings': 'Settings'
         }
 
         for var_name, text in menu_items.items():
@@ -38,6 +36,7 @@ class UI_MainWindow(object):
         self.menu_file.setTitle("Menu")
         self.menubar.addAction(self.menu_file.menuAction())
         self.menu_file.addAction(self.menu_import_transactions.menuAction())
+        self.menu_file.addAction(self.menu_settings)
         self.menu_file.addSeparator()
         self.menu_file.addAction(self.menu_quit)
 
