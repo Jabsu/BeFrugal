@@ -5,7 +5,10 @@ from datetime import date
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QFont
 from PySide6.QtWidgets import (QApplication, QGridLayout, QHeaderView, QMainWindow, QHeaderView, QStyledItemDelegate,
-                               QFileDialog, QMessageBox, QTableWidget, QTableWidgetItem, QWidget, QStyleFactory)
+                               QFileDialog, QMessageBox, QTableWidget, QTableWidgetItem, QWidget)
+
+import qdarktheme
+
 
 from ui.main_window import UI_MainWindow
 
@@ -14,8 +17,8 @@ from components.formatting import Formatting
 from components.duplicates import Duplicates
 from components.entities_found import EntitiesFound
 from components.manage_json import ManageJSON
+from components.settings import Settings
 
-# import qdarktheme
 
 class MainWindow(QMainWindow):
     def __init__(self, screen, app):
@@ -23,15 +26,16 @@ class MainWindow(QMainWindow):
         self.ui = UI_MainWindow()
         self.screen = screen
         self.app = app
-        #  app.setStyleSheet(qdarktheme.load_stylesheet())
-
+        
         self.first_resize = True
 
         self.load_settings()
-
+        
         height = self.settings["main_window_height"]
         width = self.settings["main_window_width"]
         self.ui.setup_ui(self, height, width)
+        self.apply_theme()
+
 
         self.tabs = {}
         self.tables = {}
@@ -65,9 +69,13 @@ class MainWindow(QMainWindow):
         self.db.read_data()
 
         if not self.db.data:
-            self.load_defaults()
+            self.settings = self.defaults()
         else:
-            self.settings = self.db.data
+            settings = self.db.data
+            for setting, value in self.defaults().items():
+                settings.setdefault(setting, value)
+                
+            self.settings = settings
 
     def load_comments(self):
         com_db = ManageJSON("comments.json")
@@ -105,11 +113,19 @@ class MainWindow(QMainWindow):
 
     def save_settings(self):
         self.db.save_data(self.settings)
-
-    def load_defaults(self):
+        
+    def save_settings_from_cfg_dialog(self):
+        self.settings = self.settings_ui.settings
+        self.db.save_data(self.settings)
+        try:
+            self.ui.currency_label.setText(self.settings['currency'])
+        except:
+            pass
+        
+    def defaults(self):
         '''Default settings'''
 
-        self.settings = {
+        return {
             "main_window_height": int(screen.height() / 2 + 55),
             "main_window_width": int(screen.width() / 2),
             "show_formatting_window": True,
@@ -117,6 +133,14 @@ class MainWindow(QMainWindow):
             "save_target": "10000",
             "currency": "EUR",
         }
+
+    def apply_theme(self):
+        theme = self.settings['theme']
+        if theme == "qdarktheme":
+            self.app.setStyleSheet(qdarktheme.load_stylesheet())
+        else:
+            self.app.setStyleSheet("")
+            self.app.setStyle(theme)
 
     def create_menu_connections(self):
         self.ui.menu_import_from_file.triggered.connect(self.read_file)
@@ -126,7 +150,9 @@ class MainWindow(QMainWindow):
         self.ui.menu_settings.triggered.connect(self.open_settings_dialog)
 
     def open_settings_dialog(self):
-        pass
+        self.settings_ui = Settings(self.settings, self.app)
+        self.settings_ui.show()
+        self.settings_ui.close_signal.connect(self.save_settings_from_cfg_dialog)
 
     def calculate_eta(self):
         tab = self.ui.tab_widget.currentWidget().objectName()

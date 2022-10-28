@@ -1,9 +1,9 @@
 
 ### Settings dialog
 - [x] design the UI
-- [ ] change theme
-- [ ] change currency (cosmetic)
-- [ ] toggle: show formatting dialog after each import
+- [x] change theme
+- [x] change currency (cosmetic)
+- [x] toggle: show formatting dialog after each import
 - [ ] button: delete transaction history
 - [ ] button: category configuration
 
