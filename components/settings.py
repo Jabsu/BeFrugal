@@ -38,7 +38,9 @@ class Settings(QObject):
 
         db = ManageJSON('entities.json')
         db.read_data()
-        if not db.data:
+        db2 = ManageJSON('transactions.json')
+        db2.read_data()
+        if not db.data or not db2.data:
             self.cfg_ui.configure_categories.setEnabled(False)
 
     

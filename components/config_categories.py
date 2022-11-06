@@ -21,6 +21,14 @@ class ConfigCategories(QObject):
         self.db.read_data()
         self.ents_with_cats = self.db.data
 
+    def create_list_of_categories(self):
+        self.categories = []
+        for counterparty, entities in self.ents_with_cats.items():
+            for entity, data in entities.items():
+                cat = data['category']
+                if cat not in self.categories:
+                    self.categories.append(cat)
+
     def make_connections(self):
         self.ui.add_category_button.clicked.connect(self.add_category)
         self.ui.close_signal.connect(self.save_selections)
@@ -41,21 +49,25 @@ class ConfigCategories(QObject):
         self.db.save_data(self.entities)
 
 
+    
     def add_entities(self):
         row_L = 0
         row_R = 0
         self.load_entities_with_categories()
+        self.create_list_of_categories()
+
 
         for counterparty, entities in self.entities.items():
             for entity, occurrence in entities.items():
-                print(entity, occurrence)
                 entity_label = QLabel(self.ui.scroll_area_L_contents)
                 entity_label.setText(entity)
                 occurrence_label = QLabel(str(occurrence))
 
                 category_selector = QComboBox()
-                category_selector.addItem(self.ents_with_cats[counterparty][entity]['category'])
+                for category in self.categories:
+                    category_selector.addItem(category)
                 category_selector.setObjectName(f"{entity}---{counterparty}")
+                category_selector.setCurrentText(self.ents_with_cats[counterparty][entity]['category'])
 
                 if counterparty == 'Payer':
                     row_L += 1

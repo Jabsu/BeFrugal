@@ -150,7 +150,7 @@ class MainWindow(QMainWindow):
         self.ui.menu_settings.triggered.connect(self.open_settings_dialog)
 
     def open_settings_dialog(self):
-        self.settings_ui = Settings(self.settings, self.app, self.transactions.entity_occurrences)
+        self.settings_ui = Settings(self.settings, self.app, self.transactions.calculate_occurrences())
         self.settings_ui.show()
         self.settings_ui.close_signal.connect(self.save_settings_from_cfg_dialog)
 
@@ -246,7 +246,10 @@ class MainWindow(QMainWindow):
     def merge_entities(self):
 
         ent_db = ManageJSON('entities.json')
-        self.entities['Payer'] = self.transactions.known_entities['Payer'] | self.new_entities_dialog.selections['Payer']
+
+        for counteparty in ('Payer', 'Recipient'):
+            
+            self.entities['Payer'] = self.transactions.known_entities['Payer'] | self.new_entities_dialog.selections['Payer']
         self.entities['Recipient'] = self.transactions.known_entities['Recipient'] | self.new_entities_dialog.selections['Recipient']
         ent_db.save_data(self.entities)
         self.create_tables_from_data()
