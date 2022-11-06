@@ -3,15 +3,18 @@ from PySide6.QtCore import Signal, QObject
 
 from ui.settings_window import UI_Settings
 from components.manage_json import ManageJSON
+from components.config_categories import ConfigCategories
+# 
 import qdarktheme
 
 class Settings(QObject):
 
     close_signal = Signal()
 
-    def __init__(self, settings, app):
+    def __init__(self, settings, app, entities):
         QObject.__init__(self)
         self.settings = settings
+        self.entities = entities
         self.app = app
 
     def show(self):
@@ -32,10 +35,22 @@ class Settings(QObject):
         
         self.cfg_ui.currency.setText(self.settings['currency'])
         self.cfg_ui.show_fmt_dialog_toggle.setChecked(self.settings["show_formatting_window"])
+
+        db = ManageJSON('entities.json')
+        db.read_data()
+        if not db.data:
+            self.cfg_ui.configure_categories.setEnabled(False)
+
+    
         
     def make_connections(self):
         self.cfg_ui.themes.currentIndexChanged.connect(self.change_theme)
         self.cfg_ui.close_signal.connect(self.close)
+        self.cfg_ui.configure_categories.clicked.connect(self.config_categories)
+
+    def config_categories(self):
+        self.config_cats = ConfigCategories(self.entities)
+        self.config_cats.show()
         
     def change_theme(self):
         theme = self.cfg_ui.themes.currentText()

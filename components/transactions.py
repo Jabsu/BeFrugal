@@ -10,16 +10,17 @@ class Transactions:
 
     def __init__(self, transaction_data=None):
         self.transaction_data = transaction_data
-        
+
         self.db = ManageJSON('transactions.json')
         self.ent_db = ManageJSON('entities.json')
         self.load_known_entities()
-        
+
         self.objects = []  # list of transaction objects
         self.items = {}  # dictionary of transactions
         self.old_data = {}  # previous imports
         self.duplicates = []  # list of duplicate transactions
         self.new_entities = {'Payer': {}, 'Recipient': {}}
+        self.entity_occurrences = {'Payer': {}, 'Recipient': {}}
 
     def load_known_entities(self):
         self.ent_db.read_data()
@@ -28,7 +29,7 @@ class Transactions:
         else:
             self.known_entities = {'Payer': {}, 'Recipient': {}}
 
-    #def save_entity_configurations(self, configurations):
+    # def save_entity_configurations(self, configurations):
     #    self.ent_db.save_data(configurations)
 
     def first_run(self):
@@ -36,6 +37,27 @@ class Transactions:
         if self.old_data:
             self.items = self.old_data
             # self.create_dict_of_transactions()
+            self.calculate_occurrences()
+
+    def calculate_occurrences(self):
+        for year, months in self.items.items():
+            for month, id in months.items():
+                for data in id.values():
+                    if data['amount'] > 0:
+                        key = 'Payer'
+                    else:
+                        key = 'Recipient'
+                    entity = data['entity'].title()
+                    self.entity_occurrences[key][entity] = self.entity_occurrences[key].get(
+                        entity, 0) + 1
+
+        sorted_payers = dict(sorted(self.entity_occurrences['Payer'].items(),
+                                    reverse=True, key=lambda item: item[1]))
+        sorted_recipients = dict(sorted(self.entity_occurrences['Recipient'].items(),
+                                        reverse=True, key=lambda item: item[1]))
+
+        self.entity_occurrences['Payer'] = sorted_payers
+        self.entity_occurrences['Recipient'] = sorted_recipients
 
     def import_new_data(self, preset):
         self.preset = preset
@@ -112,32 +134,36 @@ class Transactions:
             else:
                 counterparty = 'Recipient'
                 default_category = 'Uncategorized Expenses'
-            
+
             entity = transaction.entity.title()
 
             if not entity in self.known_entities[counterparty]:
-                self.known_entities[counterparty][entity] = {'category': default_category}
-            
-            self.new_entities[counterparty][entity] = self.new_entities[counterparty].get(entity, 0) + 1
+                self.known_entities[counterparty][entity] = {
+                    'category': default_category}
+
+            self.new_entities[counterparty][entity] = self.new_entities[counterparty].get(
+                entity, 0) + 1
+            self.entity_occurrences[counterparty][entity] = self.entity_occurrences[counterparty].get(
+                entity, 0) + 1
 
             id += 1
 
         sorted_payers = dict(sorted(self.new_entities['Payer'].items(),
-                    reverse=True, key=lambda item: item[1]))
+                                    reverse=True, key=lambda item: item[1]))
         sorted_recipients = dict(sorted(self.new_entities['Recipient'].items(),
-                    reverse=True, key=lambda item: item[1]))
+                                        reverse=True, key=lambda item: item[1]))
 
         self.new_entities['Payer'] = sorted_payers
         self.new_entities['Recipient'] = sorted_recipients
 
         sorted_payers = dict(sorted(self.known_entities['Payer'].items()))
-        sorted_recipients = dict(sorted(self.known_entities['Recipient'].items()))
-        
+        sorted_recipients = dict(
+            sorted(self.known_entities['Recipient'].items()))
+
         self.known_entities['Payer'] = sorted_payers
         self.known_entities['Recipient'] = sorted_recipients
 
-
-        
+        print(self.entity_occurrences)
 
     def save_imported_data(self):
         self.db.save_data(self.items)

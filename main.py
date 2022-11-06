@@ -52,13 +52,13 @@ class MainWindow(QMainWindow):
             self.entities = self.transactions.known_entities
             # self.create_categories()
             self.create_tables_from_data()
-            self.load_comments()
+            self.load_notes()
 
     def closeEvent(self, event):
         self.settings["main_window_width"] = self.size().width()
         self.settings["main_window_height"] = self.size().height()
         self.save_settings()
-        self.save_comments()
+        self.save_notes()
         try:
             event.accept()
         except AttributeError:
@@ -77,8 +77,8 @@ class MainWindow(QMainWindow):
                 
             self.settings = settings
 
-    def load_comments(self):
-        com_db = ManageJSON("comments.json")
+    def load_notes(self):
+        com_db = ManageJSON("notes.json")
         com_db.read_data()
 
         if d := com_db.data:
@@ -93,8 +93,8 @@ class MainWindow(QMainWindow):
                     cell = table.item(int(row)-1, self.comment_column)
                     cell.setText(text)
 
-    def save_comments(self):
-        com_db = ManageJSON("comments.json")
+    def save_notes(self):
+        com_db = ManageJSON("notes.json")
         dic = {}
 
         for year, table in self.tables.items():
@@ -150,7 +150,7 @@ class MainWindow(QMainWindow):
         self.ui.menu_settings.triggered.connect(self.open_settings_dialog)
 
     def open_settings_dialog(self):
-        self.settings_ui = Settings(self.settings, self.app)
+        self.settings_ui = Settings(self.settings, self.app, self.transactions.entity_occurrences)
         self.settings_ui.show()
         self.settings_ui.close_signal.connect(self.save_settings_from_cfg_dialog)
 
@@ -360,8 +360,8 @@ class MainWindow(QMainWindow):
             item = add_column('Diff.')
             item.setData(Qt.UserRole, 'Difference')
 
-        item = add_column('Comments')
-        item.setData(Qt.UserRole, 'Comments')
+        item = add_column('Notes')
+        item.setData(Qt.UserRole, 'Notes')
         item.setTextAlignment(Qt.AlignLeft | Qt.AlignVCenter)
         
         # Apply header styles
@@ -373,7 +373,7 @@ class MainWindow(QMainWindow):
                h_item.data(Qt.UserRole) == 'Net'):
                 header.setSectionResizeMode(col, QHeaderView.ResizeToContents)
                 table.setItemDelegateForColumn(col, delegate)
-            elif (h_item.data(Qt.UserRole) == 'Comments'):
+            elif (h_item.data(Qt.UserRole) == 'Notes'):
                 self.comment_column = col
                 # header.setSectionResizeMode(col, QHeaderView.ResizeToContents)
                 # header.setMaximumSectionSize(screen.width() / 4)

@@ -2,6 +2,7 @@ __pycache__
 .qt_for_python
 .venv
 testing.py
+ui_*.py
 *.ui
 *.csv
 *.txt

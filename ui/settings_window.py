@@ -42,7 +42,7 @@ class UI_Settings(QWidget):
             40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
 
         self.delete_history = QPushButton("Delete transaction history")
-        self.configure_categories = QPushButton("Configure cateogries")
+        self.configure_categories = QPushButton("Configure categories")
 
         grid_2.addWidget(self.show_fmt_dialog_toggle, 0, 0, 1, 1, Qt.AlignLeft)
         grid_2.addItem(horizontal_spacer, 1, 0, 1, 1)
